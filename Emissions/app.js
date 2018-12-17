@@ -18,6 +18,8 @@ app.get("/", (req, res) => {
     });
 });
 
+// TEST
+
 app.get("/data/:country", (req, res) => {
     let name = req.params.country;
     api.getData(name, function(err, data) {
