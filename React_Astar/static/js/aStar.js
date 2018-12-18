@@ -20,7 +20,6 @@ class Square extends React.Component {
     }
 
     handleClick() {
-        console.log("TEST!");
         this.setState({
             revealed: true,
             isBomb: this.state.isBomb
@@ -32,7 +31,7 @@ class Square extends React.Component {
         if(this.state.revealed) {
             displayString = this.state.isBomb.toString();
         }
-        return (<div className="gridSquare" onClick={this.handleClick}>{displayString}</div>);
+        return (<div className="gridSquare" onMouseDown={this.handleClick}>{displayString}</div>);
     }
 }
 
@@ -51,6 +50,33 @@ class Grid extends React.Component {
             grid.push(line);
         }
         this.status = {'grid': grid};
+        this.initializeSquares();
+    }
+
+    getNeighbours(square) {
+        // If left edge -->
+        // // TODO: GET this working!! -->
+
+        var neighbours = [];
+        let {x, y} = square.position;
+        if(x === 0) {
+            if(y === 0) {
+                neighbours = [this.status.grid[0][1], this.status.grid[1][0], this.status.grid[1][1]]
+            } else if(y === GRID_HEIGHT - 1) {
+                neighbours = [this.status.grid[y - 1][0], this.status.grid[y - 1][1], this.status.grid[y][1]]
+            } else {
+                neighbours = [this.status.grid[y - 1][0], this.status.grid[y - 1][1], this.status.grid[y][1]]
+            }
+
+        }
+    }
+
+    initializeSquares() {
+        this.status.grid.forEach((row) => {
+            row.forEach((square) => {
+
+            });
+        });
     }
 
     render() {
