@@ -1,46 +1,10 @@
 'use strict';
-/*function finalizeNavbar() {
-    let navBarItems = $(".navBarItem");
-    let fileName = window.location.pathname;
-    for(item of navBarItems) {
-        if(item.text.toLowerCase() === fileName || (fileName === "/") && item.text.toLowerCase() === "home") {
-            $(item).parent().addClass("active");
-            return;
-        }
-    }
-}
-finalizeNavbar();*/
-
 const COLORS = ['rgba(145, 60, 205, 0.6)', 'rgba(241, 95, 116, 0.6)', 'rgba(247, 109, 60, 0.6)', 'rgba(44, 168, 194, 0.6)', 'rgba(152, 203, 74, 0.6)', 'rgba(84, 129, 230, 0.6)'];
 var shownData = {};
 var graph;
 var emissionKey = "emissions";
 var populationKey = "population";
-var perCapita = true;
 
-
-function handleAddButton(button) {
-    console.log("TEST");
-    let spinnerValue = $("#dropDown").val();
-    if(!spinnerValue || spinnerValue === "") {
-        return;
-    }
-
-    let keyName = spinnerValue.split(" ").join("_");
-    if(keyName in shownData) {
-        console.log("Key already in graph!");
-        return;
-    }
-
-    getData(keyName, function(data) {
-        shownData[keyName] = data;
-        if(!graph) {
-            createGraph();
-        }
-        addCountryToList(keyName.split("_").join(" "));
-        updateGraph();
-    });
-}
 
 // Updates the graph to reflect the shownData object -->
 // Returns nothing.
@@ -49,7 +13,6 @@ function updateGraph() {
     if(!graph) {
         return;
     }
-
     // Set datasets to empty list -->
     let newDatasets = [];
     for(let key in shownData) {
@@ -74,7 +37,7 @@ function updateGraph() {
             newDatasets.push({
                 label: `${formattedName} emissions`,
                 data: data,
-                borderColor: COLORS[Math.floor(Math.random() * COLORS.length)],
+                borderColor: shownData[key]['color'],
                 country: key
             });
         }
@@ -84,16 +47,6 @@ function updateGraph() {
     graph.update();
 }
 
-// Removes item from list
-function removeItem(target) {
-    // Remove spaces add underscore -->
-    let countryName = target.dataset.country.split(" ").join("_");
-    let list = $("#dataSetList");
-    let searchString = `li[data-country="${countryName}"]`;
-    list.find(searchString).remove();
-    delete shownData[countryName];
-    updateGraph();
-}
 
 // Add item to list
 function addCountryToList(countryName) {
