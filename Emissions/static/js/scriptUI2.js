@@ -47,16 +47,6 @@ function updateGraph() {
     graph.update();
 }
 
-
-// Add item to list
-function addCountryToList(countryName) {
-    let dataList = $("#dataSetList");
-    let whiteSpaceCountry = countryName.split(" ").join("_");
-    let removeButton = `<button data-country="${countryName}" onclick="removeItem(this)">Remove</button>`;
-    let finalElement = `<li class="countryItem" data-country="${whiteSpaceCountry}">${countryName} ${removeButton}</li>`;
-    dataList.append($(finalElement));
-}
-
 function getData(country, callback) {
     $.ajax({
         url: `/data/${country}`
