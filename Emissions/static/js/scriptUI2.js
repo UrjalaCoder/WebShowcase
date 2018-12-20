@@ -44,9 +44,28 @@ function updateGraph() {
 
     }
     graph.data.datasets = newDatasets;
+
+
+    let labelString = (perCapita) ? "CO2 Emissions per population" : "Total CO2 emissions";
+    labelString += "(kt)";
+    graph.options = {
+        scales: {
+            yAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: labelString
+                },
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    };
+
     graph.update();
 }
 
+// Gets the data of a particular country by interacting with API.
 function getData(country, callback) {
     $.ajax({
         url: `/data/${country}`
@@ -59,12 +78,25 @@ function getData(country, callback) {
     });
 }
 
+function setYearlabels(start, end) {
+    let yearLabels = [];
+    for(let i = 0; i < (end - start + 1); i++) {
+        yearLabels.push((start + i).toString());
+    }
+    graph.data.labels = yearLabels;
+    graph.update();
+}
+
 function createGraph() {
     let canvas = $('#graphCanvas');
+    let currentYear = new Date().getFullYear();
     let yearLabels = [];
-    for(var i = 0; i < (2017 - 1960 + 1); i++) {
+    for(var i = 0; i < (Number(currentYear) - 1960 + 1); i++) {
         yearLabels.push((1960 + i).toString());
     }
+
+    let labelString = (perCapita) ? "CO2 Emissions per population" : "Total CO2 emissions";
+    labelString += "(kt)";
 
     graph = new Chart(canvas, {
         type: 'line',
@@ -75,6 +107,10 @@ function createGraph() {
         options: {
             scales: {
                 yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: labelString
+                    },
                     ticks: {
                         beginAtZero: true
                     }

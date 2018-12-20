@@ -6,21 +6,9 @@ const helpers = require('./helpers');
 
 var dataObject = {};
 function getData(country, callback) {
-    /*
-    *Needs to call callback with an object like:
-    *{
-    *    'population_data': populationData,
-    *    'emission_data': emissionData
-    *}
-    */
     let countryName = helpers.databaseCountryName(country);
     dbConnection.getData(countryName, function(err, data){
-        if(err) {
-            callback(err);
-            return;
-        }
-
-        callback(null, data);
+        callback(err, data);
     });
 }
 
