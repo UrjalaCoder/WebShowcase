@@ -16,10 +16,14 @@ function removeItem(target) {
 
 
 // Add item to list
-function addCountryToList(countryName) {
+function addCountryToList(countryName, color) {
+    console.log(color);
     let dataList = $("#dataSetList");
     let whiteSpaceCountry = countryName.split(" ").join("_");
-    let removeButton = `<button data-country="${countryName}" onclick="removeItem(this)">Remove</button>`;
+    let removeButton = `<button data-country="${countryName}" class="btn btn-danger" onclick="removeItem(this)">Remove</button>`;
+    let colorDiv = `<div data-country=${whiteSpaceCountry} class="colorRectangle"></div>`;
+    let colorDivElement = $(colorDiv);
+    colorDivElement.css("background-color", color.toString());
     let finalElement = `<li class="countryItem" data-country="${whiteSpaceCountry}">${countryName} ${removeButton}</li>`;
     dataList.append($(finalElement));
 }
@@ -48,7 +52,7 @@ function handleAddButton(button) {
         if(!graph) {
             createGraph();
         }
-        addCountryToList(keyName.split("_").join(" "));
+        addCountryToList(keyName.split("_").join(" "), shownData[keyName]['color']);
         updateGraph();
     });
 }
