@@ -18,4 +18,6 @@ tr {
 
 div.revealedSquare {
     background-color: gray;
+    font-size: 32px;
+    text-align: center;
 }

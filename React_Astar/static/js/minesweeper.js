@@ -1,6 +1,5 @@
 class Square extends React.Component {
     render() {
-        //console.log("Square render: " + this.props.value);
         let returnElement;
         if(this.props.isRevealed) {
             returnElement = <div className="gridSquare revealedSquare" onClick={this.props.clickEvent}> {this.props.value}</div>;
@@ -19,7 +18,6 @@ class Grid extends React.Component {
         };
     }
 
-    // TODO: Handle click events
     handleClickEvent(x, y) {
         let data = this.state.grid;
         if(data[y][x].isRevealed) {
@@ -38,86 +36,74 @@ class Grid extends React.Component {
         } else {
             data[y][x].value = mineCount;
         }
-        //console.log("mineCount: " + mineCount);
-
-        // Recursive neighbour reveal -->
-        let neighbours = this.getNeighbours(x, y, data);
-        while(neighbours.length >= 1) {
-            for(let i = 0; i < neighbours.length; i++) {
-                let n = neighbours[i];
-                if(n.isMine || n.isRevealed || this.getValue(n.x, n.y, data) !== 0) {
+        if(mineCount === 0) {
+            let neighbours = this.getNeighbours(x, y, data);
+            while(neighbours.length !== 0) {
+                for(let i = 0; i < neighbours.length; i++) {
+                    let current = neighbours[i];
                     neighbours.splice(i, 1);
-                    continue;
-                }
+                    if(current.isMine || current.isRevealed) {
+                        continue;
+                    }
 
-                // Remove n from neighbours
-                neighbours.splice(i, 1);
-                data[n.y][n.x].isRevealed = true;
+                    data[current.y][current.x].isRevealed = true;
 
-                // Recursive
-                let secondOrderNeighbours = this.getNeighbours(n.x, n.y, data);
-                for(let j = 0; j < secondOrderNeighbours.length; j++) {
-                    let sc = secondOrderNeighbours[j];
-                    if(!sc.isRevealed) {
-                        if(neighbours.indexOf(sc) === -1) {
-                            if(!sc.isMine && this.getValue(sc.x, sc.y, data) === 0)
-                                neighbours.push(sc);
+                    if(this.getValue(current.x, current.y, data) !== 0) {
+                        continue;
+                    }
+
+                    let recursiveNeighbours = this.getNeighbours(current.x, current.y, data);
+                    for(let j = 0; j < recursiveNeighbours.length; j++) {
+                        let currentRecursive = recursiveNeighbours[j];
+                        if(currentRecursive.isMine || currentRecursive.isRevealed || neighbours.indexOf(currentRecursive) !== -1) {
+                            continue;
                         }
+
+                        neighbours.push(currentRecursive);
                     }
                 }
             }
         }
-        console.log(neighbours);
-        console.log("DONE!");
         this.setState({'grid': data});
     }
 
     getValue(x, y, data) {
         let neighbours = this.getNeighbours(x, y, data);
         let a = this.getMineCount(neighbours);
-        ////console.log("A: " + a.toString());
         return a;
     }
 
     getNeighbours(x, y, data) {
         let neighbours = [];
 
-        // Left column
         if(x > 0) {
             neighbours.push(data[y][x - 1]);
         }
 
-        // Right column
         if(x < this.props.width - 1) {
             neighbours.push(data[y][x + 1]);
         }
 
-        // Top row
         if(y > 0) {
             neighbours.push(data[y - 1][x]);
         }
 
-        // Bottom row
         if(y < this.props.height - 1) {
             neighbours.push(data[y + 1][x]);
         }
 
-        // Top left
         if(x > 0 && y > 0) {
             neighbours.push(data[y - 1][x - 1]);
         }
 
-        // Top right
         if(x < this.props.width - 1 && y > 0) {
             neighbours.push(data[y - 1][x + 1]);
         }
 
-        // Bottom right
         if(x < this.props.width - 1 && y < this.props.height - 1) {
             neighbours.push(data[y + 1][x + 1]);
         }
 
-        // Bottom left
         if(x > 0 && y < this.props.height - 1) {
             neighbours.push(data[y + 1][x - 1]);
         }
@@ -135,7 +121,6 @@ class Grid extends React.Component {
     }
 
     getMineCount(array) {
-        ////console.log(array);
         let a = array.reduce((mineCount, squareData) => {
             if(squareData['isMine']) {
                 return mineCount + 1;
@@ -144,7 +129,6 @@ class Grid extends React.Component {
             }
         }, 0);
 
-        ////console.log(a);
         return a;
     }
 
@@ -152,7 +136,6 @@ class Grid extends React.Component {
         let grid = [];
         let mineCounter = 0;
 
-        // Generate initial grid
         for(let y = 0; y < this.props.height; y++) {
             let row = [];
             for(let x = 0; x < this.props.width; x++) {
@@ -161,7 +144,6 @@ class Grid extends React.Component {
             grid.push(row);
         }
 
-        // Add random distribution of mines.
         while(this.getMineCount(grid.flat()) < this.props.mineCount) {
             let randomY = Math.floor(Math.random() * grid.length)
             let randomX = Math.floor(Math.random() * grid[randomY].length);
@@ -174,8 +156,8 @@ class Grid extends React.Component {
 
     render() {
         let grid = this.state.grid;
-        ////console.log(grid);
         return (
+            <div>
             <table>
             <tbody>
                 {grid.map((row) => {
@@ -190,8 +172,10 @@ class Grid extends React.Component {
                 })}
             </tbody>
             </table>
+            <span>Mines: {this.props.mineCount}</span>
+            </div>
         );
     }
 }
 
-ReactDOM.render(<Grid width={12} height={12} mineCount={10}/>, document.getElementById("gridContainer"));
+ReactDOM.render(<Grid width={20} height={10} mineCount={20}/>, document.getElementById("gridContainer"));
