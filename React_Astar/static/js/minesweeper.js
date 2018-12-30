@@ -1,12 +1,18 @@
 class Square extends React.Component {
     render() {
-        let returnElement;
-        if(this.props.isRevealed) {
-            returnElement = <div className="gridSquare revealedSquare" onClick={this.props.clickEvent}> {this.props.value}</div>;
-        } else {
-            returnElement = <div className="gridSquare" onClick={this.props.clickEvent}></div>;
+        let returnElement = this.props.value;
+        let classes = "gridSquare";
+        if(!this.props.isRevealed) {
+            returnElement = "";
+            classes = "gridSquare revealedSquare";
         }
-        return returnElement;
+
+        if(this.props.isFlagged) {
+            returnElement = "F";
+        }
+
+        return returnElement = <div className={classes} onClick={this.props.clickEvent} onContextMenu={this.props.cMenuEvent}>{returnElement}</div>;
+
     }
 }
 
@@ -18,9 +24,20 @@ class Grid extends React.Component {
         };
     }
 
-    handleClickEvent(x, y) {
+    handleContextMenu(e, x, y) {
         let data = this.state.grid;
         if(data[y][x].isRevealed) {
+            return null;
+        }
+
+        data[y][x].isFlagged = !(data[y][x].isFlagged);
+        e.preventDefault();
+        this.setState({'grid': data});
+    }
+
+    handleClickEvent(x, y) {
+        let data = this.state.grid;
+        if(data[y][x].isRevealed || data[y][x].isFlagged) {
             return null;
         }
 
@@ -36,13 +53,16 @@ class Grid extends React.Component {
         } else {
             data[y][x].value = mineCount;
         }
+
+        // Recursive reveal of all neighbours.
         if(mineCount === 0) {
             let neighbours = this.getNeighbours(x, y, data);
             while(neighbours.length !== 0) {
                 for(let i = 0; i < neighbours.length; i++) {
                     let current = neighbours[i];
                     neighbours.splice(i, 1);
-                    if(current.isMine || current.isRevealed) {
+
+                    if(current.isMine || current.isRevealed || current.isFlagged) {
                         continue;
                     }
 
@@ -116,6 +136,7 @@ class Grid extends React.Component {
             'y': y,
             'isMine': false,
             'isRevealed': false,
+            'isFlagged': false,
             'value': null
         });
     }
@@ -165,7 +186,15 @@ class Grid extends React.Component {
                         <tr>
                             {row.map((square) => {
                                 let val = this.getValue(square.x, square.y, grid);
-                                return (<td><Square clickEvent={() => this.handleClickEvent(square.x, square.y)} value={val} isRevealed={square.isRevealed}/></td>);
+                                return (<td>
+                                            <Square
+                                                clickEvent={() => this.handleClickEvent(square.x, square.y)}
+                                                value={val}
+                                                isRevealed={square.isRevealed}
+                                                isFlagged={square.isFlagged}
+                                                cMenuEvent={(e) => this.handleContextMenu(e, square.x, square.y)}
+                                            />
+                                        </td>);
                             })}
                         </tr>
                     );

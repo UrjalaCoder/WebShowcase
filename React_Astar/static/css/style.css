@@ -16,6 +16,10 @@ tr {
     height: auto;
 }
 
+div.gridSquare {
+    font-size: 32px;
+}
+
 div.revealedSquare {
     background-color: gray;
     font-size: 32px;
