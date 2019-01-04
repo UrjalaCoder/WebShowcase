@@ -25,3 +25,11 @@ div.revealedSquare {
     font-size: 32px;
     text-align: center;
 }
+
+div.bombSquare {
+    background-color: red;
+}
+
+div.flaggedSquare {
+    background-color: lightblue;
+}

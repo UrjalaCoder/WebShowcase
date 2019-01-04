@@ -1,17 +1,21 @@
 class Square extends React.Component {
     render() {
-        let returnElement = this.props.value;
-        let classes = "gridSquare";
-        if(!this.props.isRevealed) {
-            returnElement = "";
-            classes = "gridSquare revealedSquare";
+        let classes = ['gridSquare'];
+        // Display either empty string or something else.
+        let displayValue = "";
+        if(this.props.isRevealed && this.props.value > 0 && !this.props.isMine) {
+            classes.push('revealedSquare');
+            displayValue = this.props.value;
+        } else if(!this.props.isRevealed && this.props.isFlagged){
+            classes.push('flaggedSquare');
+            displayValue = "F";
+        } else if(this.props.isRevealed && this.props.isMine){
+            classes.push('bombSquare');
+        } else if(this.props.isRevealed){
+            classes.push('revealedSquare');
         }
-
-        if(this.props.isFlagged) {
-            returnElement = "F";
-        }
-
-        return returnElement = <div className={classes} onClick={this.props.clickEvent} onContextMenu={this.props.cMenuEvent}>{returnElement}</div>;
+        let classList = classes.join(" ");
+        return (<div className={classList} onClick={this.props.clickEvent} onContextMenu={this.props.cMenuEvent}>{displayValue}</div>);
 
     }
 }
@@ -21,6 +25,8 @@ class Grid extends React.Component {
         super(props);
         this.state = {
             'grid': this.initializeGrid(),
+            'flaggedCounter': 0,
+            'success': false
         };
     }
 
@@ -30,9 +36,26 @@ class Grid extends React.Component {
             return null;
         }
 
+        let counter = this.state.flaggedCounter;
+        if(data[y][x].isFlagged) {
+            counter = counter - 1;
+        } else {
+            counter = counter + 1;
+        }
+
         data[y][x].isFlagged = !(data[y][x].isFlagged);
+
+        let success = this.state.success;
+        if(counter == this.props.mineCount) {
+            success = this.checkFlagPositions(data);
+        }
+
+        if(success) {
+            alert("You won!");
+        }
+
         e.preventDefault();
-        this.setState({'grid': data});
+        this.setState({'grid': data, 'flaggedCounter': counter, 'success': success});
     }
 
     handleClickEvent(x, y) {
@@ -43,48 +66,75 @@ class Grid extends React.Component {
 
         if(data[y][x].isMine) {
             alert("Game over!");
+            this.revealAll(data);
+            this.setState({'grid': data});
             return null;
         }
 
         data[y][x].isRevealed = true;
         let mineCount = this.getValue(x, y, data);
         if(mineCount < 1) {
-            data[y][x].value = "";
+            data[y][x].value = null;
         } else {
             data[y][x].value = mineCount;
         }
 
-        // Recursive reveal of all neighbours.
         if(mineCount === 0) {
-            let neighbours = this.getNeighbours(x, y, data);
-            while(neighbours.length !== 0) {
-                for(let i = 0; i < neighbours.length; i++) {
-                    let current = neighbours[i];
-                    neighbours.splice(i, 1);
-
-                    if(current.isMine || current.isRevealed || current.isFlagged) {
-                        continue;
-                    }
-
-                    data[current.y][current.x].isRevealed = true;
-
-                    if(this.getValue(current.x, current.y, data) !== 0) {
-                        continue;
-                    }
-
-                    let recursiveNeighbours = this.getNeighbours(current.x, current.y, data);
-                    for(let j = 0; j < recursiveNeighbours.length; j++) {
-                        let currentRecursive = recursiveNeighbours[j];
-                        if(currentRecursive.isMine || currentRecursive.isRevealed || neighbours.indexOf(currentRecursive) !== -1) {
-                            continue;
-                        }
-
-                        neighbours.push(currentRecursive);
-                    }
-                }
-            }
+            this.revealRecursive(x, y, data);
         }
         this.setState({'grid': data});
+    }
+
+    checkFlagPositions(data) {
+        let success = true;
+        data.forEach((row) => {
+            row.forEach((el) => {
+                if(el.isMine && !el.isFlagged) {
+                    success = false;
+                    return;
+                }
+            });
+        });
+        return success;
+    }
+
+    revealAll(data) {
+        data.forEach((row) => {
+            row.forEach((element) => {
+                element.isRevealed = true;
+            });
+        });
+    }
+
+    revealRecursive(x, y, data) {
+        // Get neighbours
+        let neighbours = this.getNeighbours(x, y, data);
+        while(neighbours.length !== 0) {
+            neighbours.forEach((neighbour) => {
+                // Check if the neighbour is NOT a mine or revealed or flagged.
+                if(neighbour.isMine || neighbour.isRevealed || neighbour.isFlagged) {
+                    return;
+                }
+
+                // Set neighbour to revealed and remove it from the 'neighbours' array.
+                neighbour.isRevealed = true;
+                neighbours.splice(neighbours.indexOf(neighbour), 1);
+
+                // If the 'neighbour' doesn't have a value of zero. Skip the recursion step.
+                if(this.getValue(neighbour.x, neighbour.y, data) !== 0) {
+                    return;
+                }
+
+                let addedNeighbours = this.getNeighbours(neighbour.x, neighbour.y, data);
+                addedNeighbours.forEach((an) => {
+                    if(an.isMine || an.isRevealed || an.isFlagged || (neighbours.indexOf(an) !== -1)) {
+                        return;
+                    }
+
+                    neighbours.push(an);
+                });
+            });
+        }
     }
 
     getValue(x, y, data) {
@@ -190,6 +240,7 @@ class Grid extends React.Component {
                                             <Square
                                                 clickEvent={() => this.handleClickEvent(square.x, square.y)}
                                                 value={val}
+                                                isMine={square.isMine}
                                                 isRevealed={square.isRevealed}
                                                 isFlagged={square.isFlagged}
                                                 cMenuEvent={(e) => this.handleContextMenu(e, square.x, square.y)}
@@ -201,10 +252,10 @@ class Grid extends React.Component {
                 })}
             </tbody>
             </table>
-            <span>Mines: {this.props.mineCount}</span>
+            <span>Mines: {this.props.mineCount} Flagged: {this.state.flaggedCounter} Success: {this.state.success.toString()}</span>
             </div>
         );
     }
 }
 
-ReactDOM.render(<Grid width={20} height={10} mineCount={20}/>, document.getElementById("gridContainer"));
+ReactDOM.render(<Grid width={5} height={5} mineCount={1}/>, document.getElementById("gridContainer"));
