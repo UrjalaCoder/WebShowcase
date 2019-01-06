@@ -1,2 +1,7 @@
 # WebShowcase
-This is my web oriented showcase site. Please read the Readme of primary showcase for more information.
+This is a repository for my web projects.
+
+## Projects
+### Minesweeper
+
+This is a web application which uses ReactJS and jQuery on client side. On server side it utilizes NodeJS and ExpressJS.
