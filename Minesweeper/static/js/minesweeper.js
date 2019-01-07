@@ -258,4 +258,8 @@ class Grid extends React.Component {
     }
 }
 
-ReactDOM.render(<Grid width={5} height={5} mineCount={1}/>, document.getElementById("gridContainer"));
+let width = parseInt(prompt("Width of board: "));
+let height = parseInt(prompt("Height of board: "));
+let mineCount = parseInt(prompt("Number of mines: "));
+
+ReactDOM.render(<Grid width={width} height={height} mineCount={mineCount}/>, document.getElementById("gridContainer"));
