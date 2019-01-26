@@ -16,7 +16,6 @@ class Square extends React.Component {
         }
         let classList = classes.join(" ");
         return (<div className={classList} onClick={this.props.clickEvent} onContextMenu={this.props.cMenuEvent}>{displayValue}</div>);
-
     }
 }
 
