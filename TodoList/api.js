@@ -25,19 +25,58 @@ class User {
     }
 }
 
+function Item(text, dateStamp) {
+    this.text = text;
+    this.dateStamp = dateStamp;
+}
+
 const client = new MongoClient(url);
 
-function addItemToUser(text, id, callback) {
+function updateItemArr(newArr, userId, callback) {
+    console.log(newArr);
+    getUserById(userId, (err, user) => {
+        if(err) callback(err)
+        user['items'] = newArr;
+        client.connect(function(err, db) {
+            const database = db.db("tehtavadb");
+            database.collection("Users").updateOne({'id': userId}, {$set: {'items': user['items']}}, null, (err, res) => {
+                callback(err, user);
+            });
+        });
+    });
+}
+
+function getItemArr(userId, callback) {
+    getUserById(userId, (err, user) => {
+        if(err) callback(err);
+        callback(null, user['items']);
+    });
+}
+
+function addItemToUser(text, dateStamp, id, callback) {
+    getItemArr(id, (err, itemArr) => {
+        if(err) callback(err);
+
+        let arr = itemArr.concat([new Item(text, dateStamp)]);
+        updateItemArr(arr, id, callback);
+    });
+}
+
+function removeItem(text, dateStamp, id, callback) {
     getUserById(id, (err, user) => {
         if(err) callback(err)
         console.log(user);
-        user['items'].push(text);
-        client.connect(function(err, db) {
-            const database = db.db("tehtavadb");
-            database.collection("Users").updateOne({'id': id}, {$set: {'items': user['items']}}, null, (err, res) => {
-                callback(err);
-            });
-        });
+        let index = -1;
+        for(let i = 0; i < user['items'].length; i++) {
+            if(user['items'][i].text === text && user['items'][i].dateStamp === dateStamp) {
+                index = i;
+            }
+        }
+        if(index !== -1) {
+            user['items'].splice(index, 1);
+            console.log(user['items']);
+            updateItemArr(user['items'], id, callback);
+        }
     });
 }
 
@@ -107,5 +146,6 @@ module.exports = {
     'addUser': addUser,
     'getUser': getUser,
     'getUserById': getUserById,
-    'addItemToUser': addItemToUser
+    'addItemToUser': addItemToUser,
+    'removeItem': removeItem
 };

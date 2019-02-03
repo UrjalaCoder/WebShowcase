@@ -1,11 +1,6 @@
-class ListItem extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (<li className="listItem"><span className="itemText">{this.props.text}</span> <span className="itemDate">{this.props.date || ""}</span></li>);
-    };
+const listItem = function(text) {
+    this.text = text;
+    this.dateStamp = Date.now();
 }
 
 class AddItemBox extends React.Component {
@@ -23,7 +18,7 @@ class AddItemBox extends React.Component {
 
     itemAddTry(e) {
         e.preventDefault();
-        let sendData = `text=${encodeURIComponent(this.state.text)}&id=${encodeURIComponent(this.props.user.id)}`
+        let sendData = `text=${encodeURIComponent(this.state.text)}&id=${encodeURIComponent(this.props.user.id)}&dateStamp=${encodeURIComponent(Date.now())}`
         makeAJAXRequest("POST", "/additem", sendData, (data) => {
             if(data.success === false) {
                 console.log("Failed to add item!");
@@ -50,19 +45,43 @@ class ProfilePage extends React.Component {
         super(props);
         this.state = {'items': this.props.user.items};
         this.addItem = this.addItem.bind(this);
+        this.removeItem = this.removeItem.bind(this);
     }
 
     addItem(text) {
-        this.setState({'items': this.state.items.concat([text])});
+        this.setState({'items': this.state.items.concat([new listItem(text)])});
+    }
+
+    removeItem(el) {
+        let {text, date} = el.target.dataset;
+        let deleteObj = new listItem(text);
+        deleteObj.dateStamp = date;
+        let deletedArr = this.state.items.slice();
+        let index = -1;
+        for(let i = 0; i < deletedArr.length; i++) {
+            if(deletedArr[i].text === deleteObj.text && deletedArr[i].dateStamp.toString() === deleteObj.dateStamp) {
+                index = i;
+            }
+        }
+        if(index !== -1) {
+            deletedArr.splice(index, 1);
+        } else {
+            console.log("No such element!");
+        }
+        this.setState({'items': deletedArr});
+
+        console.log(this.state.items);
+        let encodedString = `text=${encodeURIComponent(text)}&dateStamp=${encodeURIComponent(date)}`;
+        makeAJAXRequest("POST", "/removeitem", encodedString, (res, user) => {
+
+        });
     }
 
     render() {
-        console.log(this.props.user);
-        console.log(this.state);
         // if()
         let todoListItems = this.state.items.map((el) => {
-            return (<ListItem text={el} date={el.date} />);
-        });
+            return (<li onClick={this.removeItem} data-date={el.dateStamp} data-text={el.text}>{el.text}</li>);
+        }, this);
 
         return (
             <div>
@@ -101,7 +120,6 @@ class LoginBox extends React.Component {
 
     loginTry(event) {
         event.preventDefault();
-        console.log(this.state.username);
 
         let { username, password } = this.state;
 
@@ -111,7 +129,6 @@ class LoginBox extends React.Component {
 
         let sendString = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password)
         makeAJAXRequest("POST", "/login", sendString, (e) => {
-            console.log(e.success);
             if(e.success) {
                 this.props.loginHandler(e.user);
             }
@@ -206,10 +223,10 @@ class MainComponent extends React.Component {
 
         this.registerHandler = this.registerHandler.bind(this);
         this.loginHandler = this.loginHandler.bind(this);
+        this.userHandler = this.userHandler.bind(this);
     }
 
     loginHandler(user) {
-        console.log(user);
         this.setState({'loggedIn': true, 'currentUser': user});
     }
 
@@ -217,9 +234,13 @@ class MainComponent extends React.Component {
         this.setState({'loggedIn': true, 'currentUser': user});
     }
 
+    userHandler(user) {
+        this.setState({'loggedIn': true, 'currentUser': user});
+    }
+
     render() {
         if(this.state.loggedIn && this.state.currentUser) {
-            return (<ProfilePage user={this.state.currentUser} />);
+            return (<ProfilePage user={this.state.currentUser} userHandler={this.userHandler} />);
         } else {
             return (<div>
                     <LoginBox loginHandler={this.loginHandler}/> <br /> <RegisterBox registerHandler={this.registerHandler} />
