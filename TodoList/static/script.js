@@ -28,12 +28,15 @@ class AddItemBox extends React.Component {
     }
 
     render() {
-        let itemInput = <input type="text" value={this.state.itemText} name="item" onChange={this.handleTextChange}></input>;
+        let itemInput = <input type="text" className="form-control" value={this.state.itemText} name="item" onChange={this.handleTextChange}></input>;
 
         return (
             <form id="addForm" action="#" method="post">
-                <label for="item">New Item: </label>{itemInput}<br />
-                <button onClick={(e) => this.itemAddTry(e)}>Add item</button>
+                <div className="form-group">
+                    <label for="item">New Item: </label>{itemInput}
+                    <small className="form-text text-muted">Enter whatever you want to add to list.</small>
+                    <button onClick={(e) => this.itemAddTry(e)} className="btn btn-primary">Add item</button>
+                </div>
             </form>
         );
     }
@@ -80,15 +83,16 @@ class ProfilePage extends React.Component {
     render() {
         // if()
         let todoListItems = this.state.items.map((el) => {
-            return (<li onClick={this.removeItem} data-date={el.dateStamp} data-text={el.text}>{el.text}</li>);
+            return (<li onClick={this.removeItem} data-date={el.dateStamp} data-text={el.text} className="list-group-item">{el.text}</li>);
         }, this);
 
         return (
-            <div>
-                <h4>{this.props.user.name}</h4>
-                <ul> {todoListItems} </ul>
-
+            <div className="jumbotron">
+                <button onClick={this.props.logOutHandler} className="btn btn-secondary">Log out</button>
+                <h4 id="usernameHeader">{this.props.user.name}</h4>
                 <AddItemBox user={this.props.user} addHandler={this.addItem}/>
+                <br />
+                <ul class="list-group" id="todoList"> {todoListItems} </ul>
             </div>
         );
     }
@@ -221,29 +225,26 @@ class MainComponent extends React.Component {
             }
         });
 
-        this.registerHandler = this.registerHandler.bind(this);
-        this.loginHandler = this.loginHandler.bind(this);
-        this.userHandler = this.userHandler.bind(this);
+        this.userUpdateHandler = this.userUpdateHandler.bind(this);
+        this.logOutHandler = this.logOutHandler.bind(this);
     }
 
-    loginHandler(user) {
+
+    userUpdateHandler(user) {
         this.setState({'loggedIn': true, 'currentUser': user});
     }
 
-    registerHandler(user) {
-        this.setState({'loggedIn': true, 'currentUser': user});
-    }
-
-    userHandler(user) {
-        this.setState({'loggedIn': true, 'currentUser': user});
+    logOutHandler(e) {
+        e.preventDefault();
+        this.setState({'loggedIn': false, 'currentUser': null});
     }
 
     render() {
         if(this.state.loggedIn && this.state.currentUser) {
-            return (<ProfilePage user={this.state.currentUser} userHandler={this.userHandler} />);
+            return (<ProfilePage user={this.state.currentUser} logOutHandler={this.logOutHandler} userHandler={this.userUpdateHandler} />);
         } else {
             return (<div>
-                    <LoginBox loginHandler={this.loginHandler}/> <br /> <RegisterBox registerHandler={this.registerHandler} />
+                    <LoginBox loginHandler={this.userUpdateHandler}/> <br /> <RegisterBox registerHandler={this.userUpdateHandler} />
                     </div>);
         }
     }
