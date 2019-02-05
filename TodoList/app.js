@@ -25,6 +25,10 @@ app.use(cookieSession({
 
 // Static files -->
 app.use(express.static(path.join(__dirname, "static")));
+// Index login page -->
+app.get("/", (req, res, next) => {
+    res.sendFile(path.join(__dirname, "views", "index.html"));
+});
 
 //  Login router -->
 app.use(loginRouter);
@@ -34,11 +38,6 @@ app.use(profileRouter);
 
 // Item handler router -->
 app.use(itemRouter);
-
-// Index login page -->
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "views", "index.html"));
-});
 
 let server = http.createServer(app);
 server.listen(3000, () => {

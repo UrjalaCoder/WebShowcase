@@ -149,14 +149,16 @@ class LoginBox extends React.Component {
 
     render() {
 
-        let usernameInput = <input type="text" value={this.state.username} name="username" onChange={this.handleUsernameChange}></input>;
-        let passwordInput = <input type="password" value={this.state.password} name="password" onChange={this.handlePasswordChange}></input>;
+        let usernameInput = <input type="text" className="form-control" value={this.state.username} name="username" onChange={this.handleUsernameChange}></input>;
+        let passwordInput = <input type="password" className="form-control" value={this.state.password} name="password" onChange={this.handlePasswordChange}></input>;
 
         return (
             <form id="loginForm" action="#" method="post">
-                <label for="username">Username: </label>{usernameInput}<br />
-                <label for="password">Password: </label>{passwordInput}<br />
-                <button onClick={(e) => this.loginTry(e)}>Login</button>
+                <div className="form-group">
+                    <label for="username">Username: </label>{usernameInput}<br />
+                    <label for="password">Password: </label>{passwordInput}<br />
+                    <button onClick={(e) => this.loginTry(e)}>Login</button>
+                </div>
             </form>
         );
     }
@@ -236,7 +238,10 @@ class MainComponent extends React.Component {
 
     logOutHandler(e) {
         e.preventDefault();
-        this.setState({'loggedIn': false, 'currentUser': null});
+        makeAJAXRequest("POST", "/logout", "", (res) => {
+            if(!res.success) console.log("Error logging out!");
+            this.setState({'loggedIn': false, 'currentUser': null});
+        });
     }
 
     render() {

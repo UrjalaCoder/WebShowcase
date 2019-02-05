@@ -1,6 +1,12 @@
 const Router = require('express').Router();
 const api = require('./api.js');
 
+// Set JSON content header
+Router.use((req, res, next) => {
+    res.setHeader("Content-Type", "application/json");
+    next();
+});
+
 // Check if a user is loggedIn
 Router.get("/login", (req, res) => {
     if(req.session.loggedIn && req.session.id !== null) {
@@ -29,6 +35,12 @@ Router.post("/login", (req, res) => {
             }));
         }
     });
+});
+
+Router.post("/logout", (req, res) => {
+    // Just set the session to 'null';
+    req.session = null;
+    res.end(JSON.stringify({'success': true}));
 });
 
 Router.post("/register", (req, res) => {

@@ -1,5 +1,10 @@
 const Router = require('express').Router();
 const api = require('./api.js');
+// Set JSON content header
+Router.use((req, res, next) => {
+    res.setHeader("Content-Type", "application/json");
+    next();
+});
 Router.post("/additem", (req, res) => {
     let itemText = req.body.text;
     let dateStamp = req.body.dateStamp;
