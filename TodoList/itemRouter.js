@@ -25,8 +25,10 @@ Router.post("/removeitem", (req, res) => {
     console.log("TEST2");
     console.log(req.body);
     if(req.session.loggedIn) {
+        console.log("LoggedIn");
         api.removeItem(text, dateStamp, req.session.id, (err) => {
             if(err) {
+                console.log(err);
                 res.end(JSON.stringify({'success': false}));
             }
 

@@ -18,12 +18,13 @@ class AddItemBox extends React.Component {
 
     itemAddTry(e) {
         e.preventDefault();
-        let sendData = `text=${encodeURIComponent(this.state.text)}&id=${encodeURIComponent(this.props.user.id)}&dateStamp=${encodeURIComponent(Date.now())}`
+        let dStamp = Date.now();
+        let sendData = `text=${encodeURIComponent(this.state.text)}&id=${encodeURIComponent(this.props.user.id)}&dateStamp=${encodeURIComponent(dStamp)}`
         makeAJAXRequest("POST", "/additem", sendData, (data) => {
             if(data.success === false) {
                 console.log("Failed to add item!");
             }
-            this.props.addHandler(this.state.text);
+            this.props.addHandler(this.state.text, dStamp);
         });
     }
 
@@ -51,8 +52,10 @@ class ProfilePage extends React.Component {
         this.removeItem = this.removeItem.bind(this);
     }
 
-    addItem(text) {
-        this.setState({'items': this.state.items.concat([new listItem(text)])});
+    addItem(text, dateStamp) {
+        let addedItem = new listItem(text);
+        addedItem.dateStamp = dateStamp;
+        this.setState({'items': this.state.items.concat([addedItem])});
     }
 
     removeItem(el) {
@@ -71,7 +74,9 @@ class ProfilePage extends React.Component {
         } else {
             console.log("No such element!");
         }
-        this.setState({'items': deletedArr});
+        console.log("DeletedArr: ");
+        console.log(deletedArr);
+        this.setState({'items': deletedArr.slice()});
 
         console.log("Items: ");
         console.log(this.state.items);
@@ -154,13 +159,16 @@ class LoginBox extends React.Component {
         let passwordInput = <input type="password" className="form-control" value={this.state.password} name="password" onChange={this.handlePasswordChange}></input>;
 
         return (
+            <div className="jumbotron">
+            <h4>Login</h4>
+            <div className="form-group">
             <form id="loginForm" action="#" method="post">
-                <div className="form-group">
                     <label for="username">Username: </label>{usernameInput}<br />
                     <label for="password">Password: </label>{passwordInput}<br />
-                    <button onClick={(e) => this.loginTry(e)}>Login</button>
-                </div>
+                    <button className="btn btn-primary" onClick={(e) => this.loginTry(e)}>Login</button>
             </form>
+            </div>
+            </div>
         );
     }
 }
@@ -204,15 +212,20 @@ class RegisterBox extends React.Component {
 
     render() {
 
-        let usernameInput = <input type="text" value={this.state.username} name="username" onChange={this.handleUsernameChange}></input>;
-        let passwordInput = <input type="password" value={this.state.password} name="password" onChange={this.handlePasswordChange}></input>;
+        let usernameInput = <input type="text" className="form-control" value={this.state.username} name="username" onChange={this.handleUsernameChange}></input>;
+        let passwordInput = <input type="password"className="form-control" value={this.state.password} name="password" onChange={this.handlePasswordChange}></input>;
 
         return (
-            <form id="loginForm" action="#" method="post">
-                <label for="username">Username: </label>{usernameInput}<br />
-                <label for="password">Password: </label>{passwordInput}<br />
-                <button onClick={(e) => this.registerTry(e)}>Login</button>
-            </form>
+            <div className="jumbotron">
+            <h4>Register a new account</h4>
+            <div className="form-group">
+                <form id="loginForm" action="#" method="post">
+                    <label for="username">Username: </label>{usernameInput}<br />
+                    <label for="password">Password: </label>{passwordInput}<br />
+                    <button className="btn btn-primary" onClick={(e) => this.registerTry(e)}>Register</button>
+                </form>
+            </div>
+            </div>
         );
     }
 }

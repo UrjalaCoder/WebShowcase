@@ -76,6 +76,8 @@ function removeItem(text, dateStamp, id, callback) {
             user['items'].splice(index, 1);
             console.log(user['items']);
             updateItemArr(user['items'], id, callback);
+        } else {
+            callback("No such item!");
         }
     });
 }
