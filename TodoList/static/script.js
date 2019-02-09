@@ -246,9 +246,9 @@ class MainComponent extends React.Component {
 
     render() {
         if(this.state.loggedIn && this.state.currentUser) {
-            return (<ProfilePage user={this.state.currentUser} logOutHandler={this.logOutHandler} userHandler={this.userUpdateHandler} />);
+            return (<div className="container"><ProfilePage user={this.state.currentUser} logOutHandler={this.logOutHandler} userHandler={this.userUpdateHandler} /></div>);
         } else {
-            return (<div>
+            return (<div className="container">
                     <LoginBox loginHandler={this.userUpdateHandler}/> <br /> <RegisterBox registerHandler={this.userUpdateHandler} />
                     </div>);
         }

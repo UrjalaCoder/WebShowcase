@@ -1,7 +1,7 @@
 const MongoClient = require('mongodb').MongoClient;
 const uuid = require('uuid/v4');
 const crypto = require('crypto');
-const url = "mongodb://root:r00t12@ds247290.mlab.com:47290/tehtavadb";
+const url = process.env.MONGODB_URL;
 
 // Create a new 'User' object.
 // Hash the password;

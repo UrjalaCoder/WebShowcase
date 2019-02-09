@@ -40,6 +40,6 @@ app.use(profileRouter);
 app.use(itemRouter);
 
 let server = http.createServer(app);
-server.listen(3000, () => {
+server.listen(process.env.PORT || 3000, () => {
     console.log("Server started at 3000...");
 });
