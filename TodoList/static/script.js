@@ -73,6 +73,7 @@ class ProfilePage extends React.Component {
         }
         this.setState({'items': deletedArr});
 
+        console.log("Items: ");
         console.log(this.state.items);
         let encodedString = `text=${encodeURIComponent(text)}&dateStamp=${encodeURIComponent(date)}`;
         makeAJAXRequest("POST", "/removeitem", encodedString, (res, user) => {
