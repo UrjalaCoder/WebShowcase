@@ -89,7 +89,15 @@ class ProfilePage extends React.Component {
     render() {
         // if()
         let todoListItems = this.state.items.map((el) => {
-            return (<li onClick={this.removeItem} data-date={el.dateStamp} data-text={el.text} className="list-group-item">{el.text}</li>);
+            let date = new Date(parseInt(el.dateStamp));
+            console.log(date);
+            let dateString = date.toLocaleString();
+
+            return (
+            <li onClick={this.removeItem} data-date={el.dateStamp} data-text={el.text} className="list-group-item">
+                {el.text}
+                <small className="dateContainer">{dateString}</small>
+            </li>);
         }, this);
 
         return (
